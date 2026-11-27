@@ -1,0 +1,7 @@
+machine_id,temperature_c,vibration_mm_s,downtime_hours,defects
+M001,65,2.1,0.5,5
+M002,82,4.8,2.0,18
+M003,70,2.5,0.8,7
+M004,91,6.2,3.0,29
+M005,68,2.3,0.4,4
+M006,85,5.1,2.2,21

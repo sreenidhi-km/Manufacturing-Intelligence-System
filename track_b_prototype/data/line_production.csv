@@ -1,0 +1,4 @@
+production_line,daily_target,actual_output,defective_units,downtime_hours_per_day
+Line 1,1000,850,34,1.5
+Line 2,1200,900,81,2.5
+Line 3,800,720,22,1.0

@@ -1,0 +1,5 @@
+batch_id,material_used_kg,expected_material_kg,actual_output,rejected_units
+B001,520,500,850,34
+B002,640,600,900,81
+B003,410,400,720,22
+B004,530,500,820,45

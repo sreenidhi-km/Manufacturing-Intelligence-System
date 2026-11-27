@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Track B: Manufacturing Intelligence Dashboard</title>
+<style>
+  :root { --bg:#f5f6f3; --card:#ffffff; --ink:#1c2430; --muted:#637083; --line:#e3e7ec;
+           --accent:#0f766e; --accent-soft:#e6f4f2; --high:#b42318; --med:#b54708; --low:#067647; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          background: var(--bg); color: var(--ink); line-height: 1.45; }
+  .layout { display:grid; grid-template-columns: 220px 1fr; min-height:100vh; }
+  nav { background:#fff; border-right:1px solid var(--line); padding:1.4rem 1rem; position:sticky; top:0; height:100vh; }
+  .brand { font-weight:800; letter-spacing:-.01em; font-size:1.05rem; }
+  .brand small { display:block; color:var(--muted); font-weight:500; font-size:.78rem; margin-top:.15rem; }
+  nav .group { color:var(--muted); font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; margin:1.4rem 0 .4rem .5rem; }
+  nav a { display:block; color:var(--ink); text-decoration:none; padding:.5rem .65rem; border-radius:8px; font-size:.92rem; }
+  nav a:hover { background:var(--accent-soft); }
+  nav a.active { background:var(--accent-soft); color:var(--accent); font-weight:650; }
+  .demo { margin-top:1.6rem; background:#fff7e6; border:1px solid #f2d59b; color:#7a4e00; border-radius:10px; padding:.6rem .7rem; font-size:.78rem; }
+  main { padding: 1.6rem 2rem 2.5rem; }
+  header { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap; margin-bottom:1.1rem; }
+  h1 { margin:0; font-size:1.7rem; letter-spacing:-.02em; }
+  .sub { color:var(--muted); margin:.25rem 0 0; }
+  .pillbar { display:flex; gap:.5rem; flex-wrap:wrap; }
+  .chip { background:#fff; border:1px solid var(--line); border-radius:999px; padding:.35rem .75rem; font-size:.8rem; color:var(--muted); }
+  .chip.strong { color:var(--accent); border-color:#9fd6cf; }
+  .notice { background:#fff; border:1px solid var(--line); border-left:4px solid var(--med); border-radius:10px; padding:.7rem 1rem; font-size:.9rem; margin-bottom:1.2rem; }
+  section { margin-bottom:1.4rem; scroll-margin-top: 1rem; }
+  h2 { font-size:1.05rem; margin:0 0 .15rem; }
+  .hint { color:var(--muted); font-size:.85rem; margin:0 0 .8rem; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1.1rem 1.2rem; }
+
+  .kpis { display:grid; grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); gap:.8rem; }
+  .kpi { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:.9rem 1rem; }
+  .kpi-top { display:flex; align-items:center; gap:.45rem; }
+  .dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .kpi-label { color:var(--muted); font-size:.76rem; text-transform:uppercase; letter-spacing:.05em; font-weight:650; }
+  .kpi-value { font-size:1.6rem; font-weight:750; margin:.3rem 0 .05rem; letter-spacing:-.02em; }
+  .kpi-note { color:var(--muted); font-size:.8rem; }
+
+  .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:1.1rem; }
+  @media (max-width: 960px) { .grid-2 { grid-template-columns:1fr; } .layout { grid-template-columns:1fr; } nav { position:static; height:auto; } }
+
+  .item { display:flex; justify-content:space-between; gap:1rem; padding:.85rem 0; border-top:1px solid var(--line); }
+  .item:first-of-type { border-top:0; padding-top:0; }
+  .item-title { font-weight:650; }
+  .item-body { color:var(--muted); font-size:.88rem; }
+  .item-side { text-align:right; min-width:200px; }
+  .item-action { font-size:.82rem; color:var(--ink); margin-top:.3rem; }
+  .status { display:inline-block; font-size:.72rem; font-weight:650; background:#f1f3f5; color:var(--muted); padding:.15rem .55rem; border-radius:999px; }
+  .item.high .item-title::before { content:""; display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--high); margin-right:.5rem; }
+  .item.medium .item-title::before { content:""; display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--med); margin-right:.5rem; }
+
+  .actions { margin:0; padding-left:1.2rem; }
+  .actions li { margin:.5rem 0; }
+
+  .lines { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap:.9rem; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:1rem; }
+  .card-head { display:flex; justify-content:space-between; align-items:center; }
+  .line-name { font-weight:700; }
+  .line-achv { font-weight:800; font-size:1.05rem; }
+  .ring-wrap { position:relative; width:124px; height:124px; margin:.5rem auto .7rem; }
+  .ring { width:100%; height:100%; transform:rotate(-90deg); }
+  .ring-bg { fill:none; stroke:#e9edf1; stroke-width:10; }
+  .ring-fg { fill:none; stroke-width:10; stroke-linecap:round; }
+  .ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .ring-num { font-size:1.4rem; font-weight:800; }
+  .ring-sub { color:var(--muted); font-size:.7rem; }
+  .stat-row { display:flex; justify-content:space-between; font-size:.86rem; padding:.3rem 0; border-top:1px dashed var(--line); }
+  .stat-row span { color:var(--muted); }
+  .stat-row.muted strong { color:var(--muted); font-weight:600; }
+
+  .machine-row { display:grid; grid-template-columns: 56px 1fr 44px 74px; gap:.6rem; align-items:center; padding:.6rem 0; border-top:1px solid var(--line); }
+  .machine-row:first-of-type { border-top:0; }
+  .machine-id { font-weight:700; }
+  .machine-score { text-align:right; color:var(--muted); font-variant-numeric:tabular-nums; font-size:.85rem; }
+  .machine-stats { grid-column: 2 / 5; color:var(--muted); font-size:.8rem; margin-top:-.25rem; }
+  .meter { height:8px; background:#e9edf1; border-radius:999px; overflow:hidden; }
+  .meter-fill { height:100%; border-radius:999px; }
+  .pill { justify-self:start; padding:.15rem .6rem; border-radius:999px; font-size:.72rem; font-weight:700; }
+  .pill.high { background:#fde8e6; color:var(--high); }
+  .pill.medium { background:#fdf0dc; color:var(--med); }
+  .pill.low { background:#dcf5e7; color:var(--low); }
+
+  .batch-row { padding:.6rem 0; border-top:1px solid var(--line); }
+  .batch-row:first-of-type { border-top:0; }
+  .batch-id { display:inline-block; font-weight:700; width:56px; }
+  .batch-val { display:inline-block; font-weight:700; font-variant-numeric:tabular-nums; }
+  .batch-bar { height:8px; background:#e9edf1; border-radius:999px; margin:.4rem 0 .3rem; overflow:hidden; }
+  .batch-fill { height:100%; border-radius:999px; }
+  .batch-fill.over { background:var(--med); }
+  .batch-fill.under { background:var(--low); }
+  .batch-meta { color:var(--muted); font-size:.8rem; }
+  .muted { color:var(--muted); }
+
+  .warnings ul { margin:0; padding-left:1.1rem; }
+  .warnings li { margin:.45rem 0; font-size:.9rem; }
+
+  .flow { display:grid; grid-template-columns: repeat(4, 1fr); gap:.7rem; }
+  .step { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:.8rem .9rem; }
+  .step b { color:var(--accent); font-size:.8rem; letter-spacing:.06em; text-transform:uppercase; }
+  .step p { margin:.3rem 0 0; font-size:.86rem; color:var(--muted); }
+  @media (max-width: 760px) { .flow { grid-template-columns:1fr 1fr; } .item { flex-direction:column; } .item-side { text-align:left; min-width:0; } }
+  footer { color:var(--muted); font-size:.8rem; margin-top:1.5rem; }
+</style></head>
+<body>
+<div class="layout">
+  <nav>
+    <div class="brand">Manufacturing Intelligence<small>PrecisionWorks · Track B prototype</small></div>
+    <div class="group">Overview</div>
+    <a href="#snapshot" class="active">Snapshot</a>
+    <a href="#attention">Today's attention</a>
+    <a href="#actions">Suggested actions</a>
+    <div class="group">Detail</div>
+    <a href="#lines">Production lines</a>
+    <a href="#machines">Machine risk</a>
+    <a href="#materials">Material by batch</a>
+    <a href="#checks">Data checks</a>
+    <div class="group">About</div>
+    <a href="#how">How it works</a>
+    <div class="demo">Illustrative data from the case study. Nothing on this page changes records. A person approves every action.</div>
+  </nav>
+
+  <main>
+    <header>
+      <div>
+        <h1>Factory performance snapshot</h1>
+        <p class="sub">Three production lines · six machines · one day of case study data</p>
+      </div>
+      <div class="pillbar">
+        <span class="chip strong">Single-day snapshot</span>
+        <span class="chip">Human approval required</span>
+      </div>
+    </header>
+
+    <div class="notice"><strong>Not measured results.</strong> These figures come from the case study tables. The 30- and 90-day impact figures are a plan, not outcomes.</div>
+
+    <section id="snapshot">
+      <div class="kpis"><div class="kpi"><div class="kpi-top"><span class="dot" style="background:#b54708"></span>
+          <span class="kpi-label">Overall achievement</span></div>
+          <div class="kpi-value">82.3%</div>
+          <div class="kpi-note">2,470 of 3,000 units</div></div><div class="kpi"><div class="kpi-top"><span class="dot" style="background:#b42318"></span>
+          <span class="kpi-label">Units short</span></div>
+          <div class="kpi-value">530</div>
+          <div class="kpi-note">Line 2 accounts for 300</div></div><div class="kpi"><div class="kpi-top"><span class="dot" style="background:#b54708"></span>
+          <span class="kpi-label">Defect rate</span></div>
+          <div class="kpi-value">5.5%</div>
+          <div class="kpi-note">137 defective units</div></div><div class="kpi"><div class="kpi-top"><span class="dot" style="background:#b54708"></span>
+          <span class="kpi-label">Downtime</span></div>
+          <div class="kpi-value">10.4%</div>
+          <div class="kpi-note">of scheduled hours, all lines</div></div><div class="kpi"><div class="kpi-top"><span class="dot" style="background:#b42318"></span>
+          <span class="kpi-label">High-risk machines</span></div>
+          <div class="kpi-value">3</div>
+          <div class="kpi-note">out of 6 observed</div></div><div class="kpi"><div class="kpi-top"><span class="dot" style="background:#b54708"></span>
+          <span class="kpi-label">Material over expected</span></div>
+          <div class="kpi-value">+100 kg</div>
+          <div class="kpi-note">+5.0% across four batches</div></div></div>
+    </section>
+
+    <section id="attention">
+      <div class="panel">
+        <h2>Today's attention</h2>
+        <p class="hint">What needs a look first, ranked by impact. Each item waits for a person to review it.</p>
+        <div class="item high">
+          <div class="item-main"><div class="item-title">Line 2 is the largest gap</div>
+          <div class="item-body">75.0% achievement, 300 units short, 15.6% downtime.</div></div>
+          <div class="item-side"><span class="status">Awaiting review</span>
+          <div class="item-action">Suggested: Review the downtime causes on this line first.</div></div></div><div class="item high">
+          <div class="item-main"><div class="item-title">M004 is High risk</div>
+          <div class="item-body">Score 1.00: 91 °C, 6.2 mm/s, 29 defects.</div></div>
+          <div class="item-side"><span class="status">Awaiting review</span>
+          <div class="item-action">Suggested: Inspect against the manufacturer&#x27;s alarm limits before any other action.</div></div></div><div class="item medium">
+          <div class="item-main"><div class="item-title">B002 used more material</div>
+          <div class="item-body">+40 kg (+6.7%) over expected.</div></div>
+          <div class="item-side"><span class="status">Awaiting review</span>
+          <div class="item-action">Suggested: Check the batch record and weighing for this run.</div></div></div>
+      </div>
+    </section>
+
+    <section id="actions">
+      <div class="panel">
+        <h2>Suggested actions</h2>
+        <p class="hint">Suggestions for a manager or engineer to decide on. They are generated from the rules in analysis.py and are not instructions.</p>
+        <ol class="actions"><li>Inspect M004, M006, M002 against manufacturer alarm limits, which the case study does not provide.</li><li>Find out why Line 2 lost 2.5 hours a day. Only about 188 of its 300 missing units are explained by downtime.</li><li>Add a line ID and timestamps to every machine reading, so machine totals can be matched to line totals.</li><li>Check the material records for B002 and B004, which are over expected, and confirm which line B004 came from.</li></ol>
+      </div>
+    </section>
+
+    <section id="lines">
+      <div class="panel">
+        <h2>Production lines</h2>
+        <p class="hint">Green at 90% achievement or above, amber at 80–90%, red below 80%. OEE is an estimate: achievement × quality.</p>
+        <div class="lines"><div class="card">
+          <div class="card-head"><div class="line-name">Line 1</div>
+            <div class="line-achv" style="color:#b54708">85.0%</div></div>
+          <div class="ring-wrap"><svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="38" class="ring-bg"/>
+      <circle cx="50" cy="50" r="38" class="ring-fg" stroke="#b54708"
+        stroke-dasharray="194.83 238.76"/>
+    </svg>
+            <div class="ring-center"><div class="ring-num">82%</div>
+            <div class="ring-sub">OEE est.</div></div></div>
+          <div class="stat-row"><span>Defect rate</span><strong>4.0%</strong></div>
+          <div class="stat-row"><span>Downtime</span><strong>9.4%</strong></div>
+          <div class="stat-row"><span>Shortfall</span><strong>150 units</strong></div>
+          <div class="stat-row muted"><span>Not explained by downtime</span><strong>56 units</strong></div>
+        </div><div class="card">
+          <div class="card-head"><div class="line-name">Line 2</div>
+            <div class="line-achv" style="color:#b42318">75.0%</div></div>
+          <div class="ring-wrap"><svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="38" class="ring-bg"/>
+      <circle cx="50" cy="50" r="38" class="ring-fg" stroke="#b42318"
+        stroke-dasharray="162.95 238.76"/>
+    </svg>
+            <div class="ring-center"><div class="ring-num">68%</div>
+            <div class="ring-sub">OEE est.</div></div></div>
+          <div class="stat-row"><span>Defect rate</span><strong>9.0%</strong></div>
+          <div class="stat-row"><span>Downtime</span><strong>15.6%</strong></div>
+          <div class="stat-row"><span>Shortfall</span><strong>300 units</strong></div>
+          <div class="stat-row muted"><span>Not explained by downtime</span><strong>112 units</strong></div>
+        </div><div class="card">
+          <div class="card-head"><div class="line-name">Line 3</div>
+            <div class="line-achv" style="color:#067647">90.0%</div></div>
+          <div class="ring-wrap"><svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="38" class="ring-bg"/>
+      <circle cx="50" cy="50" r="38" class="ring-fg" stroke="#067647"
+        stroke-dasharray="208.32 238.76"/>
+    </svg>
+            <div class="ring-center"><div class="ring-num">87%</div>
+            <div class="ring-sub">OEE est.</div></div></div>
+          <div class="stat-row"><span>Defect rate</span><strong>3.1%</strong></div>
+          <div class="stat-row"><span>Downtime</span><strong>6.2%</strong></div>
+          <div class="stat-row"><span>Shortfall</span><strong>80 units</strong></div>
+          <div class="stat-row muted"><span>Not explained by downtime</span><strong>30 units</strong></div>
+        </div></div>
+      </div>
+    </section>
+
+    <div class="grid-2">
+      <section id="machines">
+        <div class="panel">
+          <h2>Machine risk</h2>
+          <p class="hint">Weighted rule: vibration 35%, temperature 25%, downtime 20%, defects 20%, scaled to the highest value in the sample. High ≥ 0.75, Medium ≥ 0.50. Check against manufacturer alarm limits.</p>
+          <div class="machine-row">
+          <div class="machine-id">M004</div>
+          <div class="meter"><div class="meter-fill" style="width:100.0%;background:#b42318"></div></div>
+          <div class="machine-score">1.00</div>
+          <span class="pill high">High</span>
+          <div class="machine-stats">91 °C · 6.2 mm/s · 3.0 h · 29 defects</div>
+        </div><div class="machine-row">
+          <div class="machine-id">M006</div>
+          <div class="meter"><div class="meter-fill" style="width:81.3%;background:#b42318"></div></div>
+          <div class="machine-score">0.81</div>
+          <span class="pill high">High</span>
+          <div class="machine-stats">85 °C · 5.1 mm/s · 2.2 h · 21 defects</div>
+        </div><div class="machine-row">
+          <div class="machine-id">M002</div>
+          <div class="meter"><div class="meter-fill" style="width:75.4%;background:#b42318"></div></div>
+          <div class="machine-score">0.75</div>
+          <span class="pill high">High</span>
+          <div class="machine-stats">82 °C · 4.8 mm/s · 2.0 h · 18 defects</div>
+        </div><div class="machine-row">
+          <div class="machine-id">M003</div>
+          <div class="meter"><div class="meter-fill" style="width:43.5%;background:#067647"></div></div>
+          <div class="machine-score">0.44</div>
+          <span class="pill low">Low</span>
+          <div class="machine-stats">70 °C · 2.5 mm/s · 0.8 h · 7 defects</div>
+        </div><div class="machine-row">
+          <div class="machine-id">M005</div>
+          <div class="meter"><div class="meter-fill" style="width:37.1%;background:#067647"></div></div>
+          <div class="machine-score">0.37</div>
+          <span class="pill low">Low</span>
+          <div class="machine-stats">68 °C · 2.3 mm/s · 0.4 h · 4 defects</div>
+        </div><div class="machine-row">
+          <div class="machine-id">M001</div>
+          <div class="meter"><div class="meter-fill" style="width:36.5%;background:#067647"></div></div>
+          <div class="machine-score">0.36</div>
+          <span class="pill low">Low</span>
+          <div class="machine-stats">65 °C · 2.1 mm/s · 0.5 h · 5 defects</div>
+        </div>
+        </div>
+      </section>
+      <section id="materials">
+        <div class="panel">
+          <h2>Material by batch</h2>
+          <p class="hint">Material used against expected. Amber means over expected; green means under. Bar length is relative to the largest variance.</p>
+          <div class="batch-row">
+          <div class="batch-id">B001</div>
+          <div class="batch-val">+20 kg <span class="muted">(+4.0%)</span></div>
+          <div class="batch-bar"><div class="batch-fill over"
+            style="width:60.0%"></div></div>
+          <div class="batch-meta">520 used · 500 expected · 850 units · 34 rejected</div>
+        </div><div class="batch-row">
+          <div class="batch-id">B002</div>
+          <div class="batch-val">+40 kg <span class="muted">(+6.7%)</span></div>
+          <div class="batch-bar"><div class="batch-fill over"
+            style="width:100.0%"></div></div>
+          <div class="batch-meta">640 used · 600 expected · 900 units · 81 rejected</div>
+        </div><div class="batch-row">
+          <div class="batch-id">B003</div>
+          <div class="batch-val">+10 kg <span class="muted">(+2.5%)</span></div>
+          <div class="batch-bar"><div class="batch-fill over"
+            style="width:37.5%"></div></div>
+          <div class="batch-meta">410 used · 400 expected · 720 units · 22 rejected</div>
+        </div><div class="batch-row">
+          <div class="batch-id">B004</div>
+          <div class="batch-val">+30 kg <span class="muted">(+6.0%)</span></div>
+          <div class="batch-bar"><div class="batch-fill over"
+            style="width:90.0%"></div></div>
+          <div class="batch-meta">530 used · 500 expected · 820 units · 45 rejected</div>
+        </div>
+        </div>
+      </section>
+    </div>
+
+    <section id="checks">
+      <div class="panel warnings">
+        <h2>Data checks</h2>
+        <p class="hint">Inconsistencies in the input data. Resolve these before trusting any single number.</p>
+        <ul><li>Downtime mismatch: lines total 5.0 h, machines total 8.9 h. Machines have no line ID, so they cannot be reconciled.</li><li>Defect mismatch: lines total 137, machines total 84.</li><li>Batch B004 (output 820) matches no production line. Its line of origin is unknown.</li><li>Line data covers one day, but the brief&#x27;s evaluation period is 30 days. No monthly figure can be computed from this data.</li><li>Machine readings have no timestamps and arrive at irregular intervals, so they cannot be linked to specific downtime events.</li></ul>
+      </div>
+    </section>
+
+    <section id="how">
+      <h2>How it works</h2>
+      <p class="hint">The same loop every week, so anyone on the team can follow it and check it.</p>
+      <div class="flow">
+        <div class="step"><b>1 · Detect</b><p>Rules and KPIs flag lines, machines and batches that need a look.</p></div>
+        <div class="step"><b>2 · Explain</b><p>Every number shows its inputs and formula, so it can be challenged.</p></div>
+        <div class="step"><b>3 · Approve</b><p>A person reviews each item and decides what to do. Nothing is automatic.</p></div>
+        <div class="step"><b>4 · Learn</b><p>Recorded outcomes become the labels a future model would need.</p></div>
+      </div>
+    </section>
+
+    <footer>Generated by build_dashboard.py from analysis.py · edit the CSV files in data/ and re-run to refresh.</footer>
+  </main>
+</div>
+</body></html>
